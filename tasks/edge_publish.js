@@ -309,12 +309,12 @@ module.exports = function(grunt) {
 							if (func == 'bindSymbolAction'){
 								var funcDefn = compress_actions(mycomp.definition.actions[sym][func][el]);
 								if (funcDefn != "function(sym,e){}")//empty func
-									this_sym_actions += 'Symbol.bindSymbolAction('+TOSOURCE(edgeParser.compositions[0])+',x_sym,'+TOSOURCE_min(el, min_strings)+','+funcDefn+');';
+									this_sym_actions += 'Symbol.bindSymbolAction(compId,x_sym,'+TOSOURCE_min(el, min_strings)+','+funcDefn+');';
 							} else {
 								for (ev in mycomp.definition.actions[sym][func][el]){
 									var funcDefn = compress_actions(mycomp.definition.actions[sym][func][el][ev]);
 									if (funcDefn != "function(sym,e){}")//empty func
-										this_sym_actions += 'Symbol.'+func+'('+TOSOURCE(edgeParser.compositions[0])+',x_sym,'+TOSOURCE_min(el, min_strings)+','+TOSOURCE_min(ev, min_strings)+','+funcDefn+');';
+										this_sym_actions += 'Symbol.'+func+'(compId,x_sym,'+TOSOURCE_min(el, min_strings)+','+TOSOURCE_min(ev, min_strings)+','+funcDefn+');';
 								}
 							}
 						}
