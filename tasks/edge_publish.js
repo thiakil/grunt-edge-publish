@@ -28,8 +28,6 @@ module.exports = function(grunt) {
 			staticPreloader: true,
 			embedPreloaderImages: true,
 			uglify: true,
-			headExtra: false,
-			footerExtra: false,
 			embedCompInHtml: false,
 			minify: {
 				eid: true,
@@ -37,7 +35,8 @@ module.exports = function(grunt) {
 				numbers: true,
 				zeros: true,
 				strings: true,
-			}
+			},
+			htmlTemplate: path.resolve(__dirname+'/../default_template.handlebars')
 		});
 
 		var done = this.async();
@@ -359,7 +358,7 @@ module.exports = function(grunt) {
 					});
 				}
 				
-				var html_template = Handlebars.compile(grunt.file.read('html_template.handlebars'));
+				var html_template = Handlebars.compile(grunt.file.read(options.htmlTemplate));
 
 				grunt.file.write(outdir+an_content.HTMLFileName, 
 					html_template({
@@ -372,8 +371,6 @@ module.exports = function(grunt) {
 							load: edge_load_comp,
 							//actions: edge_actions_js
 						},
-						footerExtra: options.footerExtra,
-						headExtra: options.headExtra,
 						'options': options,
 					})
 				);

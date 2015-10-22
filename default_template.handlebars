@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+		<title>{{comp_info.name}}</title>
+		<script>
+		{{#each comp_info.preloader.dom}}
+		var img_{{id}} = "{{{fill.[1]}}}";
+		{{/each}}
+		</script>
+		<style>
+		{{{edge.css}}}
+		</style>
+	</head>
+	<body style="margin:0;padding:0;">
+		<div id="Stage" class="{{comp_info.className}}">
+			{{#if options.staticPreloader}}
+				{{#each comp_info.preloader.dom}}
+				<div id="{{id}}" class="{{id}}_id edgePreload-{{../comp_info.className}}"></div>
+				{{/each}}
+			{{/if}}
+		</div>
+		{{#if options.staticPreloader}}
+			<script>
+			{{#each comp_info.preloader.dom}}
+			document.getElementById('{{id}}').style.backgroundImage = 'url('+img_{{id}}+')';
+			{{/each}}
+			</script>
+		{{/if}}
+		<script src="{{{edge.include}}}"></script>
+		<script>{{{edge.load}}}</script>
+	</body>
+</html>
