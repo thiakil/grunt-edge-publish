@@ -154,7 +154,9 @@ module.exports = function(grunt) {
 					if (!curval.match(/^eid\d+$/)){ return curval; }
 					else { return 'e'+(eid_i++); }
 				}
-				var rgba_re = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/i
+				var rgba_re = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/i;
+				var rgb_re = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
+				var shorthex_re = /#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i;
 				function minColour(curval){
 					if (rgba_re.test(curval)){
 						var rgba_val = rgba_re.exec(curval);
@@ -162,8 +164,8 @@ module.exports = function(grunt) {
 							var hexval = '#'+parseInt(rgba_val[1]).toString(16)+
 											 parseInt(rgba_val[2]).toString(16)+
 											 parseInt(rgba_val[3]).toString(16);
-							if (hexval.match(/#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i)){//eg FFFFFF
-								var hextmp = (/#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i).exec(hexval);
+							if (shorthex_re.test(hexval)){//eg FFFFFF
+								var hextmp = (shorthex_re).exec(hexval);
 								return '#'+hextmp[1]+hextmp[2]+hextmp[3];//return eg. #fff
 							} else {
 								return hexval;//can't shorten, return full
@@ -171,6 +173,18 @@ module.exports = function(grunt) {
 						} else if (rgba_val[4].match(/^0\.\d+$/)){
 							rgba_val[4] = rgba_val[4].replace(/^0/, '');//remove the useless 0
 							return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
+						}
+					}
+					if (rgb_re.test(curval)){
+						var rgb_val = rgb_re.exec(curval);
+						var hexval = '#'+parseInt(rgb_val[1]).toString(16)+
+										 parseInt(rgb_val[2]).toString(16)+
+										 parseInt(rgb_val[3]).toString(16);
+						if (shorthex_re.test(hexval)) {//eg FFFFFF
+							var hextmp = (shorthex_re).exec(hexval);
+							return '#'+hextmp[1]+hextmp[2]+hextmp[3];//return eg. #fff
+						} else {
+							return hexval;//can't shorten, return full
 						}
 					}
 					return curval;
