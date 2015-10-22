@@ -169,10 +169,13 @@ module.exports = function(grunt) {
 							} else {
 								return hexval;//can't shorten, return full
 							}
-						} else if (rgba_val[4].match(/^0\.\d+$/)){
-							rgba_val[4] = rgba_val[4].replace(/^0/, '');//remove the useless 0
+						} else if (rgba_val[4].match(/^0\.0+$/)){
+							rgba_val[4] = 0;//remove the useless .00
 							return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
 						}
+
+						//catchall, to make sure no spaces between values
+						return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
 					}
 					if (rgb_re.test(curval)){
 						var rgb_val = rgb_re.exec(curval);
