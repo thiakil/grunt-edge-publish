@@ -5996,7 +5996,7 @@ window.AdobeEdge.yepnope = window.yepnope;
 		var f = sym[funcName[0]],
 			ff;
 
-		function dispatchError(args) {
+		function dispatchError(args, err) {
 
 			if (args.length >= 2 && typeof args[0] === 'object' && typeof args[1] === 'object' && args[1].type !== 'onError') {
 				var evt;
@@ -6007,7 +6007,7 @@ window.AdobeEdge.yepnope = window.yepnope;
 				evt.originalEvent = args[1];
 				document.dispatchEvent(evt);
 			}
-			window.console.log("Javascript error in event handler! Event Type = " + eventType);
+			window.console.log("Javascript error in event handler! Event Type = " + eventType + ' '+err);
 		}
 
 		if (typeof f === "function") {
@@ -6027,7 +6027,7 @@ window.AdobeEdge.yepnope = window.yepnope;
 					try {
 						return f.apply(sym, args);
 					} catch (err) {
-						dispatchError(args);
+						dispatchError(args, err);
 						return undefined;
 					}
 				};
@@ -6051,7 +6051,7 @@ window.AdobeEdge.yepnope = window.yepnope;
 					try {
 						return f.apply(sym, args);
 					} catch (err) {
-						dispatchError(args);
+						dispatchError(args, err);
 						return undefined;
 					}
 				};
@@ -6079,7 +6079,7 @@ window.AdobeEdge.yepnope = window.yepnope;
 					try {
 						return f.apply(sym, args);
 					} catch (err) {
-						dispatchError(args);
+						dispatchError(args, err);
 						return undefined;
 					}
 				};
