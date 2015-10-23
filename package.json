@@ -44,7 +44,8 @@
     "async": "^1.4.2",
     "handlebars": "^4.0.3",
     "htmlparser2": "^3.8.3",
-    "tosource": "^1.0.0"
+    "semver": "^5.0.3",
+    "tosource": "^1.0.0",
     "uglify-js": "^2.5.0"
   }
 }
