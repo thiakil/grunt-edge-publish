@@ -78,54 +78,13 @@ module.exports = function(grunt) {
 				}
 				var project_prefix = an_content.HTMLFileName.replace(new RegExp(path.extname(an_content.HTMLFileName)+'$'), '');
 				//console.log(an_content.HTMLFileName);
-				var src_html = grunt.file.read(src_basedir+an_content.HTMLFileName);
-				var edge_runtime = edge_runtime_re.exec(src_html);
-				if (!edge_runtime || !edge_runtime[1]){
-					return grunt.fatal("Could not find runtime content in "+an_content.HTMLFileName);
-				}
-				edge_runtime = edge_runtime[1];
-
-				var edge_include_filename, edge_runtime_css;
-
-				var handler = new htmlparser.DomHandler(function (error, dom) {
-					if (error){
-						grunt.fatal(error);
-					} else {
-						//console.log(dom);
-						dom.forEach(function(e){
-							if (e.type == 'script' && e.children.length){
-								e.children.forEach(function(ee){
-									if (ee.type == 'text' && ee.data.indexOf('loadComposition')){
-										try {
-											//console.log("found", ee.data);
-											edgeParser.parse(ee.data, edgeParser);
-										} catch (err) {
-											grunt.fatal(err);
-										}
-									} else { console.log(ee)}
-								})							
-							} else if (e.type == 'script' && e.attribs.src && e.attribs.src.indexOf('edge_includes') > -1){
-								edge_include_filename = e.attribs.src;
-							} else if (e.type == 'style' && e.children.length){
-								e.children.forEach(function(ee){
-									if (ee.type == 'text') {
-										edge_runtime_css = (edge_runtime_css || '')+ee.data.trim();
-									}
-								});
-							}
-						})
-					}
-				}, {normalizeWhitespace:true});
-
-				var parser = new htmlparser.Parser(handler);
-				parser.write(edge_runtime);
-				parser.done();
+				edgeParser.load(src_basedir+an_content.HTMLFileName);
 
 				if (!edgeParser.compositions.length){
 					grunt.fatal("No compositions were found to be loading!")
 				} else if (edgeParser.compositions.length > 1){
 					grunt.fatal("More than 1 composition was found!");
-				} else if (!options.conditionalEdgeLibrary && !edge_include_filename){
+				} else if (!options.conditionalEdgeLibrary && !edgeParser.edge_include_filename){
 					grunt.fatal("Did not find edge include in HTML!");
 				}
 				//console.log(edgeParser._compositions[edgeParser.compositions[0]]);
@@ -137,13 +96,11 @@ module.exports = function(grunt) {
 					preloader: mycomp.pl,
 					downlevel: mycomp.dl
 				};
-				//console.log(edge_runtime_css, edge_include_filename);
-
-				var edge_main_js = grunt.file.read(src_basedir+project_prefix+'_edge.js');
-				var edge_actions_js = grunt.file.read(src_basedir+project_prefix+'_edgeActions.js');
+				//console.log(edgeParser.edge_runtime_css, edgeParser.edge_include_filename);
 
 				try {
-					edgeParser.parse(edge_main_js+edge_actions_js, edgeParser);
+					edgeParser.load(src_basedir+project_prefix+'_edge.js');
+					edgeParser.load(src_basedir+project_prefix+'_edgeActions.js');
 				} catch (e) {
 					grunt.fatal(e);
 				}
@@ -345,7 +302,7 @@ module.exports = function(grunt) {
 							domEl.fill[1] = get_data_uri(src_basedir+domEl.fill[1]);
 						}
 						if (options.staticPreloader){
-							edge_runtime_css += '#'+domEl.id+'{'+
+							edgeParser.edge_runtime_css += '#'+domEl.id+'{'+
 												'position:absolute;'+
 												'top:'+domEl.rect[1]+';'+
 												'left:'+domEl.rect[0]+';'+
@@ -384,10 +341,10 @@ module.exports = function(grunt) {
 					}
 					grunt.file.mkdir(outdir+'edge_includes');
 					grunt.file.write(outdir+'edge_includes/edge.6.0.0.min.custom.js', library_js);
-					edge_include_filename = 'edge_includes/edge.6.0.0.min.custom.js';
+					edgeParser.edge_include_filename = 'edge_includes/edge.6.0.0.min.custom.js';
 				} else {
 					grunt.file.mkdir(outdir+'edge_includes');
-					grunt.file.copy(src_basedir+edge_include_filename, outdir+edge_include_filename);
+					grunt.file.copy(src_basedir+edgeParser.edge_include_filename, outdir+edgeParser.edge_include_filename);
 				}
 
 				var html_template = Handlebars.compile(grunt.file.read(options.htmlTemplate));
@@ -395,13 +352,10 @@ module.exports = function(grunt) {
 				grunt.file.write(outdir+an_content.HTMLFileName, 
 					html_template({
 						'comp_info': comp_info, 
-						'edge_runtime': edge_runtime,
 						'edge': {
-							include: edge_include_filename,
-							css: edge_runtime_css,
-							//main: edge_main_js,
+							include: edgeParser.edge_include_filename,
+							css: edgeParser.edge_runtime_css,
 							load: edge_load_comp + (options.embedCompInHtml ? (js_out_with_closure+'AdobeEdge.compositions['+TOSOURCE(edgeParser.compositions[0])+'].ready()') : ''),//add the _edge.js file to here if we're wanting to include it
-							//actions: edge_actions_js
 						},
 						'options': options,
 					})
