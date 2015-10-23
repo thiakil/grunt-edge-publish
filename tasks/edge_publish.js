@@ -334,7 +334,7 @@ module.exports = function(grunt) {
 					generated_actions +
 				'})(window.jQuery||AdobeEdge.$,AdobeEdge,'+TOSOURCE(edgeParser.compositions[0])+');';
 
-				var edge_load_comp = "AdobeEdge.loadComposition("+(options.embedCompInHtml ? '0' : TOSOURCE(mycomp.pr))+','+TOSOURCE(edgeParser.compositions[0])+','+TOSOURCE(mycomp.op)+','+TOSOURCE(mycomp.pl)+','+TOSOURCE(mycomp.dl)+')';
+				var edge_load_comp = "AdobeEdge.loadComposition("+(options.embedCompInHtml ? '0' : TOSOURCE(mycomp.pr))+','+TOSOURCE(edgeParser.compositions[0])+','+TOSOURCE(mycomp.op)+','+TOSOURCE(mycomp.pl)+','+TOSOURCE(mycomp.dl)+');';
 
 				if (options.staticPreloader || options.embedPreloaderImages){
 					comp_info.preloader.dom.forEach(function(domEl){
@@ -400,13 +400,15 @@ module.exports = function(grunt) {
 							include: edge_include_filename,
 							css: edge_runtime_css,
 							//main: edge_main_js,
-							load: edge_load_comp,
+							load: edge_load_comp + (options.embedCompInHtml ? (js_out_with_closure+'AdobeEdge.compositions['+TOSOURCE(edgeParser.compositions[0])+'].ready()') : ''),//add the _edge.js file to here if we're wanting to include it
 							//actions: edge_actions_js
 						},
 						'options': options,
 					})
 				);
-				grunt.file.write(outdir+project_prefix+'_edge.js', js_out_with_closure);
+				if (!options.embedCompInHtml){
+					grunt.file.write(outdir+project_prefix+'_edge.js', js_out_with_closure);
+				}
 
 				edgeParser.dirs.forEach(function(dir){
 					grunt.file.mkdir(outdir+dir);
