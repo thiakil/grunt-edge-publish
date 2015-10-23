@@ -9,7 +9,6 @@
 var async= require('async');
 var vm = require('vm');
 var path = require('path');
-var util = require('util');
 var Handlebars = require('handlebars');
 var htmlparser = require("htmlparser2");
 var tosource = require('../lib/tosource');
@@ -228,7 +227,7 @@ module.exports = function(grunt) {
 						if (typeof el == 'string'){//check that its still a string
 							stringsList[el] = (stringsList[el] || 0) + 1;
 						}
-					} else if (util.isArray(el)){
+					} else if (Array.isArray(el)){
 						el = el.map(min_el);
 					} /*else {
 						console.log(typeof el);
