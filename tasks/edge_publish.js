@@ -24,6 +24,7 @@ module.exports = function(grunt) {
 	grunt.registerMultiTask('edge_publish', 'Node.js based publishing of Adobe Edge Animate projects', function() {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
+			conditionalEdgeLibrary: true,
 			staticPreloader: true,
 			embedPreloaderImages: true,
 			uglify: true,
@@ -124,7 +125,7 @@ module.exports = function(grunt) {
 					grunt.fatal("No compositions were found to be loading!")
 				} else if (edgeParser.compositions.length > 1){
 					grunt.fatal("More than 1 composition was found!");
-				} else if (!edge_include_filename){
+				} else if (!options.conditionalEdgeLibrary && !edge_include_filename){
 					grunt.fatal("Did not find edge include in HTML!");
 				}
 				//console.log(edgeParser._compositions[edgeParser.compositions[0]]);
@@ -359,7 +360,36 @@ module.exports = function(grunt) {
 						}
 					});
 				}
+
+				function includeIfPropertyAnimated(filename, props){
+					if (has_in_set(edgeParser.propertiesAnimated, props)){
+						grunt.log.ok("Adding "+filename);
+						return grunt.file.read(__dirname+'/../support/'+filename);
+					} else {
+						return '';
+					}
+				}
 				
+				if (options.conditionalEdgeLibrary){
+					var library_js = grunt.file.read(__dirname+'/../support/edge.6.0.0.js');
+					library_js += includeIfPropertyAnimated('edge.transform-tween.js', 'translateX translateY translateZ scaleX scaleY rotateX rotateY rotateZ skewX skewY location motion'.split(' '));
+					library_js += includeIfPropertyAnimated('edge.color-tween.js', ['color', 'background-color', 'border-color']);
+					library_js += includeIfPropertyAnimated('edge.gradient-tween.js', ['background-image']);
+					//NB: motion requires transform too
+					library_js += includeIfPropertyAnimated('edge.motion-tween.js', ['location', 'motion']);
+					try {
+						library_js = UglifyJS.minify(library_js, {fromString: true}).code;
+					} catch (e) {
+						grunt.fatal("Could not minify library js, "+e);
+					}
+					grunt.file.mkdir(outdir+'edge_includes');
+					grunt.file.write(outdir+'edge_includes/edge.6.0.0.min.custom.js', library_js);
+					edge_include_filename = 'edge_includes/edge.6.0.0.min.custom.js';
+				} else {
+					grunt.file.mkdir(outdir+'edge_includes');
+					grunt.file.copy(src_basedir+edge_include_filename, outdir+edge_include_filename);
+				}
+
 				var html_template = Handlebars.compile(grunt.file.read(options.htmlTemplate));
 
 				grunt.file.write(outdir+an_content.HTMLFileName, 
@@ -377,9 +407,6 @@ module.exports = function(grunt) {
 					})
 				);
 				grunt.file.write(outdir+project_prefix+'_edge.js', js_out_with_closure);
-
-				grunt.file.mkdir(outdir+'edge_includes');
-				grunt.file.copy(src_basedir+edge_include_filename, outdir+edge_include_filename);
 
 				edgeParser.dirs.forEach(function(dir){
 					grunt.file.mkdir(outdir+dir);
@@ -441,3 +468,7 @@ module.exports = function(grunt) {
 	}
 
 };
+
+function has_in_set(check, set){//test if check has any elements from set
+	return check.filter(function(el){ return set.indexOf(el) > -1}).length > 0;
+}
