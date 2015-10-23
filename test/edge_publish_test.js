@@ -27,7 +27,7 @@ exports.edge_publish = {
     // setup here if necessary
     done();
   },
-  default_options: function(test) {
+  /*default_options: function(test) {
     test.expect(1);
 
     var actual = grunt.file.read('tmp/default_options');
@@ -44,5 +44,14 @@ exports.edge_publish = {
     test.equal(actual, expected, 'should describe what the custom option(s) behavior is.');
 
     test.done();
-  },
+  },*/
+  edge_parser: function(test){
+    test.expect(3);
+    var EdgeParser = require('../lib/edge_parser');
+    var parser = new EdgeParser();
+    test.doesNotThrow(function(){ parser.parse('AdobeEdge.loadComposition("all", "EDGE-9362843", {scaleToFit: "none", centerStage: "none", minW: "0px", maxW: "undefined", width: "550px", height: "400px"}, {dom: [ ]}, {dom: [ ]});')}, "EdgeParser.parse should not throw here");
+    test.ok(Array.isArray(parser.compositions), "parser.compositions is an array");
+    test.equal(parser.compositions[0], 'EDGE-9362843', "parser.compositions[0] == 'EDGE-9362843'");
+    test.done();
+  }
 };
