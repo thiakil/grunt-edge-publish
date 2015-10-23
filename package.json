@@ -45,5 +45,6 @@
     "handlebars": "^4.0.3",
     "htmlparser2": "^3.8.3",
     "tosource": "^1.0.0"
+    "uglify-js": "^2.5.0"
   }
 }
