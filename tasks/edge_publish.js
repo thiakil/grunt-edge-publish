@@ -110,63 +110,7 @@ module.exports = function(grunt) {
 					if (!curval.match(/^eid\d+$/)){ return curval; }
 					else { return 'e'+(eid_i++); }
 				}
-				var rgba_re = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/i;
-				var rgb_re = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
-				var shorthex_re = /#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i;
-				function minColour(curval){
-					if (rgba_re.test(curval)){
-						var rgba_val = rgba_re.exec(curval);
-						if (rgba_val[4] == '1' || rgba_val[4] == '1.00'){
-							var hexval = '#'+parseInt(rgba_val[1]).toString(16)+
-											 parseInt(rgba_val[2]).toString(16)+
-											 parseInt(rgba_val[3]).toString(16);
-							if (shorthex_re.test(hexval)){//eg FFFFFF
-								var hextmp = (shorthex_re).exec(hexval);
-								return '#'+hextmp[1]+hextmp[2]+hextmp[3];//return eg. #fff
-							} else {
-								return hexval;//can't shorten, return full
-							}
-						} else if (rgba_val[4].match(/^0\.0+$/)){
-							rgba_val[4] = 0;//remove the useless .00
-							return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
-						}
-
-						//catchall, to make sure no spaces between values
-						return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
-					}
-					if (rgb_re.test(curval)){
-						var rgb_val = rgb_re.exec(curval);
-						var hexval = '#'+parseInt(rgb_val[1]).toString(16)+
-										 parseInt(rgb_val[2]).toString(16)+
-										 parseInt(rgb_val[3]).toString(16);
-						if (shorthex_re.test(hexval)) {//eg FFFFFF
-							var hextmp = (shorthex_re).exec(hexval);
-							return '#'+hextmp[1]+hextmp[2]+hextmp[3];//return eg. #fff
-						} else {
-							return hexval;//can't shorten, return full
-						}
-					}
-					return curval;
-				}
-				function minNumber(curval){
-					if (curval.match(/^\d+$/)){
-						var numval = parseInt(curval);
-						if (numval == curval){//likely useless, but just be sure
-							return numval;
-						}
-					}
-					if (curval.match(/^0\.0+$/)){ //e.g. 0.00000000
-						return 0;
-					}
-					return curval;
-				}
-				var zero_units_re = /^0+(px|em|%|ex|cm|mm|in|pt|pc|ch|rem)$/;//add css units here
-				function minZero(curval){
-					if (zero_units_re.test(curval)){
-						return 0;
-					}
-					return curval;
-				}
+				
 				var stringsList = {};
 				function min_el(el){
 					if (typeof el == 'string'){
@@ -427,4 +371,62 @@ module.exports = function(grunt) {
 
 function has_in_set(check, set){//test if check has any elements from set
 	return check.filter(function(el){ return set.indexOf(el) > -1}).length > 0;
+}
+
+var rgba_re = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$/i;
+var rgb_re = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
+var shorthex_re = /#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3/i;
+function minColour(curval){
+	if (rgba_re.test(curval)){
+		var rgba_val = rgba_re.exec(curval);
+		if (rgba_val[4] == '1' || rgba_val[4] == '1.00'){
+			var hexval = '#'+parseInt(rgba_val[1]).toString(16)+
+							 parseInt(rgba_val[2]).toString(16)+
+							 parseInt(rgba_val[3]).toString(16);
+			if (shorthex_re.test(hexval)){//eg FFFFFF
+				var hextmp = (shorthex_re).exec(hexval);
+				return '#'+hextmp[1]+hextmp[2]+hextmp[3];//return eg. #fff
+			} else {
+				return hexval;//can't shorten, return full
+			}
+		} else if (rgba_val[4].match(/^0\.0+$/)){
+			rgba_val[4] = 0;//remove the useless .00
+			return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
+		}
+
+		//catchall, to make sure no spaces between values
+		return "rgba("+rgba_val[1]+','+rgba_val[2]+','+rgba_val[3]+','+rgba_val[4]+')';
+	}
+	if (rgb_re.test(curval)){
+		var rgb_val = rgb_re.exec(curval);
+		var hexval = '#'+parseInt(rgb_val[1]).toString(16)+
+						 parseInt(rgb_val[2]).toString(16)+
+						 parseInt(rgb_val[3]).toString(16);
+		if (shorthex_re.test(hexval)) {//eg FFFFFF
+			var hextmp = (shorthex_re).exec(hexval);
+			return '#'+hextmp[1]+hextmp[2]+hextmp[3];//return eg. #fff
+		} else {
+			return hexval;//can't shorten, return full
+		}
+	}
+	return curval;
+}
+function minNumber(curval){
+	if (curval.match(/^\d+$/)){
+		var numval = parseInt(curval);
+		if (numval == curval){//likely useless, but just be sure
+			return numval;
+		}
+	}
+	if (curval.match(/^0\.0+$/)){ //e.g. 0.00000000
+		return 0;
+	}
+	return curval;
+}
+var zero_units_re = /^0+(px|em|%|ex|cm|mm|in|pt|pc|ch|rem)$/;//add css units here
+function minZero(curval){
+	if (zero_units_re.test(curval)){
+		return 0;
+	}
+	return curval;
 }
