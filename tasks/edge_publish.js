@@ -274,8 +274,8 @@ module.exports = function(grunt) {
 				if (options.conditionalEdgeLibrary){
 					var library_js = grunt.file.read(__dirname+'/../support/edge.6.0.0.js');
 					library_js += includeIfPropertyAnimated('edge.transform-tween.js', 'translateX translateY translateZ scaleX scaleY rotateX rotateY rotateZ skewX skewY location motion'.split(' '));
-					library_js += includeIfPropertyAnimated('edge.color-tween.js', ['color', 'background-color', 'border-color']);
-					library_js += includeIfPropertyAnimated('edge.gradient-tween.js', ['background-image']);
+					library_js += includeIfPropertyAnimated('edge.color-tween.js', ['color', 'background-color', 'border-color', 'background-image']);
+					library_js += includeIfPropertyAnimated('edge.gradient-tween.js', ['background-image']);//needs color tween?
 					//NB: motion requires transform too
 					library_js += includeIfPropertyAnimated('edge.motion-tween.js', ['location', 'motion']);
 					try {
