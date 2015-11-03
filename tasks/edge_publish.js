@@ -21,6 +21,21 @@ var UglifyJS = require("uglify-js");
 
 module.exports = function(grunt) {
 
+	Handlebars.registerHelper('if_grunt_option', function(conditional, options) {
+		if(grunt.option(conditional)) {
+			return options.fn(this);
+		} else {
+			return options.inverse(this);
+		}
+	});
+	Handlebars.registerHelper('unless_grunt_option', function(conditional, options) {
+		if(!grunt.option(conditional)) {
+			return options.fn(this);
+		} else {
+			return options.inverse(this);
+		}
+	});
+
 	grunt.registerMultiTask('edge_publish', 'Node.js based publishing of Adobe Edge Animate projects', function() {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
@@ -302,6 +317,8 @@ module.exports = function(grunt) {
 							load: edge_load_comp + (options.embedCompInHtml ? (js_out_with_closure+'AdobeEdge.compositions['+TOSOURCE(edgeParser.compositions[0])+'].ready()') : ''),//add the _edge.js file to here if we're wanting to include it
 						},
 						'options': options,
+						'width': mycomp.op.width.replace('px', ''),
+						'height': mycomp.op.height.replace('px', ''),
 					})
 				);
 				if (!options.embedCompInHtml){
